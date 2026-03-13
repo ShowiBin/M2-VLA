@@ -1,8 +1,8 @@
-# Academic Project Page Template
+# M²-VLA Project Page
 
-> **Update (September 2025)**: This template has been modernized with better design, SEO, and mobile support. For the original version, see the [original-version branch](https://github.com/eliahuhorwitz/Academic-project-page-template/tree/original-version).
+This is the project page for **M²-VLA: Boosting Vision-Language Models for Generalizable Manipulation via Layer Mixture and Meta-Skills**.
 
-A clean, responsive template for academic project pages.
+> This page is built using the [Academic Project Page Template](https://github.com/eliahuhorwitz/Academic-project-page-template), which provides a clean, responsive design with modern SEO and mobile support.
 
 
 Example project pages built using this template are:
@@ -21,13 +21,20 @@ Example project pages built using this template are:
 
 
 
-## Start using the template
-To start using the template click on `Use this Template`.
+## Project Information
 
-The template uses html for controlling the content and css for controlling the style. 
-To edit the websites contents edit the `index.html` file. It contains different HTML "building blocks", use whichever ones you need and comment out the rest.  
+- **Paper Title**: M²-VLA: Boosting Vision-Language Models for Generalizable Manipulation via Layer Mixture and Meta-Skills
+- **Authors**: Siyao Xiao, Yuhong Zhang, Zhifang Liu, Zihan Gao, Jingye Zhang, Sinwai Choo, Dake Zhong, Mengzhe Wang, Xiao Lin, Xianfeng Zhou, Jia Jia, Haoqian Wang
+- **Conference**: IROS 2025
+- **Institutions**: Tsinghua Shenzhen International Graduate School, Tsinghua University; Peng Cheng Laboratory; Fudan University; Synapath
 
-**IMPORTANT!** Make sure to replace the `favicon.ico` under `static/images/` with one of your own, otherwise your favicon is going to be a dreambooth image of me.
+## Project Page Contents
+
+This page includes:
+- Introduction video (60 seconds)
+- 4 demo videos (simulation and real-world demonstrations)
+- Paper abstract and method overview
+- BibTeX citation
 
 ## What's New
 

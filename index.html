@@ -72,8 +72,8 @@
   <title>M²-VLA: Boosting Vision-Language Models for Generalizable Manipulation | Academic Research</title>
   
   <!-- Favicon and App Icons -->
-  <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
-  <link rel="apple-touch-icon" href="static/images/favicon.ico">
+  <link rel="icon" type="image/svg+xml" href="static/images/icon.svg">
+  <link rel="apple-touch-icon" href="static/images/icon.svg">
   
   <!-- Critical CSS - Load synchronously -->
   <link rel="stylesheet" href="static/css/bulma.min.css">
@@ -234,7 +234,10 @@
       <div class="container is-max-desktop">
         <div class="columns is-centered">
           <div class="column has-text-centered">
-            <h1 class="title is-1 publication-title">M²-VLA: Boosting Vision-Language Models for Generalizable Manipulation via Layer Mixture and Meta-Skills</h1>
+            <h1 class="title is-1 publication-title" style="display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+              <img src="static/images/icon.svg" alt="M²-VLA Icon" style="width: 60px; height: 60px; flex-shrink: 0;">
+              <span>M²-VLA: Boosting Vision-Language Models for Generalizable Manipulation via Layer Mixture and Meta-Skills</span>
+            </h1>
             <div class="is-size-5 publication-authors">
               <span class="author-block">
                 <a href="#" target="_blank">Siyao Xiao</a><sup>1,2</sup>,</span>
@@ -251,9 +254,9 @@
               <span class="author-block">
                 <a href="#" target="_blank">Dake Zhong</a><sup>1</sup>,</span>
               <span class="author-block">
-                <a href="#" target="_blank">Mengzhe Wang</a><sup>4</sup>,</span>
+                <a href="#" target="_blank">Mengzhe Wang</a><sup>3</sup>,</span>
               <span class="author-block">
-                <a href="#" target="_blank">Xiao Lin</a><sup>3</sup>,</span>
+                <a href="#" target="_blank">Xiao Lin</a><sup>4</sup>,</span>
               <span class="author-block">
                 <a href="#" target="_blank">Xianfeng Zhou</a><sup>1</sup>,</span>
               <span class="author-block">
@@ -265,9 +268,9 @@
 
             <div class="is-size-5 publication-authors">
               <span class="author-block">
-                <sup>1</sup>Tsinghua Shenzhen International Graduate School, Tsinghua University<br>
+                <sup>1</sup>Tsinghua University<br>
                 <sup>2</sup>Peng Cheng Laboratory<br>
-                <sup>3</sup>College of Intelligent Robotics and Advanced Manufacturing, Fudan University<br>
+                <sup>3</sup>Fudan University<br>
                 <sup>4</sup>Synapath<br>
                 
               </span>
@@ -346,126 +349,328 @@
 </section>
 <!-- End paper abstract -->
 
-
-<!-- Image carousel -->
-<section class="hero is-small">
-  <div class="hero-body">
-    <div class="container">
-      <h2 class="title is-3">Method Overview</h2>
-      <div id="results-carousel" class="carousel results-carousel">
-       <div class="item">
-        <img src="static/images/carousel1.jpg" alt="M²-VLA Framework Overview" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-          M²-VLA Framework: Feature Extraction and Action Generation streams with MoL and MSM modules.
-        </h2>
-      </div>
-      <div class="item">
-        <img src="static/images/carousel2.jpg" alt="Mixture of Layers (MoL)" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-          Mixture of Layers (MoL): Selectively extracts task-critical information from VLM representations.
-        </h2>
-      </div>
-      <div class="item">
-        <img src="static/images/carousel3.jpg" alt="Meta Skill Module (MSM)" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-         Meta Skill Module (MSM): Enhances trajectory learning through knowledge reuse and action refinement.
-       </h2>
-     </div>
-     <div class="item">
-      <img src="static/images/carousel4.jpg" alt="Experimental Results" loading="lazy"/>
-      <h2 class="subtitle has-text-centered">
-        Experimental Results: Strong generalization on instruction-following and novel-object tasks.
-      </h2>
-    </div>
-  </div>
-</div>
-</div>
-</section>
-<!-- End image carousel -->
-
-
-
-
-<!-- Youtube video -->
+<!-- Motivation -->
 <section class="hero is-small is-light">
   <div class="hero-body">
-    <div class="container">
-      <h2 class="title is-3">Video Presentation</h2>
-      <div class="columns is-centered has-text-centered">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Motivation</h2>
+      <div class="columns is-centered">
         <div class="column is-four-fifths">
-          <div class="publication-video">
-            <!-- TODO: Replace with your YouTube video ID when available -->
-            <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+          <div class="content has-text-centered">
+            <figure class="image">
+              <img src="static/images/problem.png" alt="Problem: Catastrophic Forgetting in VLA Models" style="max-width: 100%; height: auto;">
+            </figure>
+            <div class="content has-text-justified" style="margin-top: 1.5rem;">
+              <p>
+                Current Vision-Language-Action (VLA) frameworks typically utilize pre-trained Vision-Language Model (VLM) backbones, fine-tuning their internal parameters on large-scale robotic datasets to repurpose the model's generation capabilities from language tokens to action tokens. However, this paradigm brings <strong>catastrophic forgetting</strong>, degrading the VLM's inherent semantic understanding and consequently limiting the VLA's generalizability.
+              </p>
+              <p style="margin-top: 1rem;">
+                As illustrated above, while state-of-the-art VLA models perform well on in-domain tasks, they struggle with novel instructions or objects and frequently lose their Visual Question Answering (VQA) capabilities. We argue that preserving semantic understanding is a fundamental prerequisite for robust manipulation. Therefore, we propose that a generalized VLM can be effectively adapted as the backbone for robotic manipulation without compromising its core capabilities.
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
-<!-- End youtube video -->
+<!-- End Motivation -->
 
-
-<!-- Video carousel -->
+<!-- Framework and Method -->
 <section class="hero is-small">
   <div class="hero-body">
-    <div class="container">
-      <h2 class="title is-3">Demo Videos</h2>
-      <div id="demo-carousel" class="carousel results-carousel">
-        <div class="item item-video1">
-          <video poster="" id="demo1" controls muted loop height="100%" preload="metadata">
-            <source src="static/videos/demo1.mp4" type="video/mp4">
-          </video>
-          <h2 class="subtitle has-text-centered">
-            Demo 1: Simulation Results
-          </h2>
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Framework and Method</h2>
+      <div class="columns is-centered">
+        <div class="column is-full">
+          <div class="content has-text-centered">
+            <figure class="image">
+              <img src="static/images/architecture.jpg" alt="M²-VLA Framework" style="max-width: 100%; height: auto;">
+            </figure>
+            <p class="subtitle has-text-centered" style="margin-top: 1rem;">
+              <strong>M²-VLA Framework:</strong> The model extracts visual and language features, concatenates them with learnable queries, and utilizes a pre-trained VLM as the perceptual backbone. Action generation is decoupled and performed via a denoising transformer head, with Mixture of Layers (MoL) performing feature extraction from VLM, and Meta Skill Module (MSM) improving model capacity.
+            </p>
+          </div>
         </div>
-        <div class="item item-video2">
-          <video poster="" id="demo2" controls muted loop height="100%" preload="metadata">
-            <source src="static/videos/demo2.mp4" type="video/mp4">
-          </video>
-          <h2 class="subtitle has-text-centered">
-            Demo 2: Real-World Manipulation
-          </h2>
+      </div>
+      
+      <div class="columns is-centered" style="margin-top: 2rem;">
+        <div class="column is-half">
+          <figure class="image">
+            <img src="static/images/mol.png" alt="Mixture of Layers (MoL)" style="max-width: 100%; height: auto;">
+          </figure>
+          <p class="subtitle has-text-centered" style="margin-top: 1rem;">
+            <strong>Mixture of Layers (MoL):</strong> Adaptively integrates hierarchical features extracted at various layers of the VLM via three decoupled attention branches, dynamically filtering and aggregating task-relevant knowledge for downstream action generation.
+          </p>
         </div>
-        <div class="item item-video3">
-          <video poster="" id="demo3" controls muted loop height="100%" preload="metadata">
-            <source src="static/videos/demo3.mp4" type="video/mp4">
-          </video>
-          <h2 class="subtitle has-text-centered">
-            Demo 3: Long-Horizon Tasks
-          </h2>
-        </div>
-        <div class="item item-video4">
-          <video poster="" id="demo4" controls muted loop height="100%" preload="metadata">
-            <source src="static/videos/demo4.mp4" type="video/mp4">
-          </video>
-          <h2 class="subtitle has-text-centered">
-            Demo 4: Novel Object Manipulation
-          </h2>
+        <div class="column is-half">
+          <figure class="image">
+            <img src="static/images/msm.png" alt="Meta Skill Module (MSM)" style="max-width: 100%; height: auto;">
+          </figure>
+          <p class="subtitle has-text-centered" style="margin-top: 1rem;">
+            <strong>Meta Skill Module (MSM):</strong> Augments the action head with a repository of perceptual-skill pairs, allowing retrieval and integration of relevant meta-skills for action refinement during training and inference.
+          </p>
         </div>
       </div>
     </div>
   </div>
 </section>
-<!-- End video carousel -->
+<!-- End Framework and Method -->
 
 
-
-
-
-
-<!-- Paper poster -->
+<!-- Real-World Experiments -->
 <section class="hero is-small is-light">
   <div class="hero-body">
-    <div class="container">
-      <h2 class="title">Poster</h2>
-      <!-- TODO: Replace with your poster PDF when available -->
-      <iframe src="static/pdfs/sample.pdf" width="100%" height="550">
-      </iframe>
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Real-World Experiments</h2>
+      
+      <!-- Real-world videos - side by side -->
+      <div class="columns is-centered" style="margin-bottom: 2rem;">
+        <div class="column is-one-third">
+          <video poster="" controls muted loop height="100%" preload="metadata" style="width: 100%;">
+            <source src="static/videos/real_pick_apple.mp4" type="video/mp4">
+          </video>
+          <p class="subtitle has-text-centered" style="margin-top: 0.5rem; font-size: 0.9rem;">
+            Pick apple into basket
+          </p>
+        </div>
+        <div class="column is-one-third">
+          <video poster="" controls muted loop height="100%" preload="metadata" style="width: 100%;">
+            <source src="static/videos/real_pour_water.mp4" type="video/mp4">
+          </video>
+          <p class="subtitle has-text-centered" style="margin-top: 0.5rem; font-size: 0.9rem;">
+            Pour water into bowl
+          </p>
+        </div>
+        <div class="column is-one-third">
+          <video poster="" controls muted loop height="100%" preload="metadata" style="width: 100%;">
+            <source src="static/videos/real_novel_objects.mp4" type="video/mp4">
+          </video>
+          <p class="subtitle has-text-centered" style="margin-top: 0.5rem; font-size: 0.9rem;">
+            Novel objects
+          </p>
+        </div>
+      </div>
+
+      <!-- Real-world results table -->
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <div class="content">
+            <table class="table is-bordered is-striped is-narrow is-fullwidth" style="font-size: 0.9rem;">
+              <thead>
+                <tr>
+                  <th rowspan="2">Method</th>
+                  <th colspan="2" style="text-align: center;">Fundamental</th>
+                  <th colspan="2" style="text-align: center;">Generalization</th>
+                </tr>
+                <tr>
+                  <th style="text-align: center;">Pick apple<br>into basket</th>
+                  <th style="text-align: center;">Pour water<br>into bowl</th>
+                  <th style="text-align: center;">Instruction<br>following</th>
+                  <th style="text-align: center;">Novel<br>objects</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>smolVLA</td>
+                  <td style="text-align: center;">25</td>
+                  <td style="text-align: center;">30</td>
+                  <td style="text-align: center;">25</td>
+                  <td style="text-align: center;">20</td>
+                </tr>
+                <tr>
+                  <td>VLA-Adapter (Frozen)</td>
+                  <td style="text-align: center;">10</td>
+                  <td style="text-align: center;">0</td>
+                  <td style="text-align: center;">5</td>
+                  <td style="text-align: center;">5</td>
+                </tr>
+                <tr>
+                  <td>VLA-Adapter</td>
+                  <td style="text-align: center;">60</td>
+                  <td style="text-align: center;">50</td>
+                  <td style="text-align: center;">55</td>
+                  <td style="text-align: center;">0</td>
+                </tr>
+                <tr style="background-color: #f5f5f5;">
+                  <td><strong>M²-VLA</strong></td>
+                  <td style="text-align: center;"><strong>85</strong></td>
+                  <td style="text-align: center;"><strong>90</strong></td>
+                  <td style="text-align: center;"><strong>80</strong></td>
+                  <td style="text-align: center;"><strong>75</strong></td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="has-text-centered" style="margin-top: 1rem; font-size: 0.9rem;">
+              <strong>Table:</strong> Comparison of Real-world Tasks Based on Success Rate (%). <strong>Bold</strong> indicates the best performance.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
-<!--End paper poster -->
+<!-- End Real-World Experiments -->
+
+<!-- Simulation Experiments -->
+<section class="hero is-small">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Simulation Experiments</h2>
+      
+      <!-- Simulation videos - side by side -->
+      <div class="columns is-centered" style="margin-bottom: 2rem;">
+        <div class="column is-half">
+          <video poster="" controls muted loop height="100%" preload="metadata" style="width: 100%;">
+            <source src="static/videos/demo1.mp4" type="video/mp4">
+          </video>
+          <p class="subtitle has-text-centered" style="margin-top: 0.5rem; font-size: 0.9rem;">
+            Simulation Demo 1
+          </p>
+        </div>
+        <div class="column is-half">
+          <video poster="" controls muted loop height="100%" preload="metadata" style="width: 100%;">
+            <source src="static/videos/demo2.mp4" type="video/mp4">
+          </video>
+          <p class="subtitle has-text-centered" style="margin-top: 0.5rem; font-size: 0.9rem;">
+            Simulation Demo 2
+          </p>
+        </div>
+      </div>
+      
+      <div class="columns is-centered" style="margin-bottom: 2rem;">
+        <div class="column is-half">
+          <video poster="" controls muted loop height="100%" preload="metadata" style="width: 100%;">
+            <source src="static/videos/demo3.mp4" type="video/mp4">
+          </video>
+          <p class="subtitle has-text-centered" style="margin-top: 0.5rem; font-size: 0.9rem;">
+            Simulation Demo 3
+          </p>
+        </div>
+        <div class="column is-half">
+          <video poster="" controls muted loop height="100%" preload="metadata" style="width: 100%;">
+            <source src="static/videos/demo4.mp4" type="video/mp4">
+          </video>
+          <p class="subtitle has-text-centered" style="margin-top: 0.5rem; font-size: 0.9rem;">
+            Simulation Demo 4
+          </p>
+        </div>
+      </div>
+
+      <!-- Simulation results table -->
+      <div class="columns is-centered">
+        <div class="column is-full">
+          <div class="content" style="overflow-x: auto;">
+            <table class="table is-bordered is-striped is-narrow" style="font-size: 0.85rem; width: 100%;">
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>VLM Fine-tuning</th>
+                  <th>Spatial</th>
+                  <th>Object</th>
+                  <th>Goal</th>
+                  <th>Long</th>
+                  <th>Avg.</th>
+                  <th>Params (B)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>OpenVLA</td>
+                  <td>Yes</td>
+                  <td>84.7</td>
+                  <td>88.4</td>
+                  <td>79.2</td>
+                  <td>53.7</td>
+                  <td>76.5</td>
+                  <td>7.0</td>
+                </tr>
+                <tr>
+                  <td>MolmoAct</td>
+                  <td>Yes</td>
+                  <td>87.0</td>
+                  <td>95.4</td>
+                  <td>87.6</td>
+                  <td>77.2</td>
+                  <td>86.6</td>
+                  <td>7.0</td>
+                </tr>
+                <tr>
+                  <td>ThinkAct</td>
+                  <td>Yes</td>
+                  <td>88.3</td>
+                  <td>91.4</td>
+                  <td>87.1</td>
+                  <td>70.9</td>
+                  <td>84.4</td>
+                  <td>7.0</td>
+                </tr>
+                <tr>
+                  <td>CoT-VLA</td>
+                  <td>Yes</td>
+                  <td>87.5</td>
+                  <td>91.6</td>
+                  <td>87.6</td>
+                  <td>69.0</td>
+                  <td>81.1</td>
+                  <td>7.0</td>
+                </tr>
+                <tr>
+                  <td>FlowVLA</td>
+                  <td>Yes</td>
+                  <td>93.2</td>
+                  <td>95.0</td>
+                  <td>91.6</td>
+                  <td>72.6</td>
+                  <td>88.1</td>
+                  <td>7.0</td>
+                </tr>
+                <tr>
+                  <td>SmolVLA</td>
+                  <td>No</td>
+                  <td>93.0</td>
+                  <td>94.0</td>
+                  <td>91.0</td>
+                  <td>77.0</td>
+                  <td>88.8</td>
+                  <td>2.2</td>
+                </tr>
+                <tr>
+                  <td>VLA-Adapter (Frozen)</td>
+                  <td>No</td>
+                  <td>94.4</td>
+                  <td>94.2</td>
+                  <td>86.8</td>
+                  <td>82.0</td>
+                  <td>89.4</td>
+                  <td>0.5</td>
+                </tr>
+                <tr style="background-color: #f5f5f5;">
+                  <td><strong>M²-VLA</strong></td>
+                  <td><strong>No</strong></td>
+                  <td><strong>97.8</strong></td>
+                  <td><strong>99.0</strong></td>
+                  <td><strong>97.2</strong></td>
+                  <td><strong>87.0</strong></td>
+                  <td><strong>95.3</strong></td>
+                  <td><strong>0.3</strong></td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="has-text-centered" style="margin-top: 1rem; font-size: 0.9rem;">
+              <strong>Table:</strong> Comparison of Simulation Benchmarks Based on Success Rate (%). "VLM Fine-tuning" indicates whether the method requires fine-tuning the VLM backbone. <strong>Bold</strong> indicates the best performance.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- End Simulation Experiments -->
+
+
+
+
 
 
 

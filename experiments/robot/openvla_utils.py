@@ -96,12 +96,18 @@ def check_model_logic_mismatch(pretrained_checkpoint: str) -> None:
 
 def find_checkpoint_file(pretrained_checkpoint: str, file_pattern: str) -> str:
     assert os.path.isdir(pretrained_checkpoint), f'Checkpoint path must be a directory: {pretrained_checkpoint}'
+    for filename in (f'{file_pattern}.pt', f'{file_pattern}--checkpoint.pt'):
+        checkpoint_path = os.path.join(pretrained_checkpoint, filename)
+        if os.path.isfile(checkpoint_path):
+            return checkpoint_path
     checkpoint_files = []
     for filename in os.listdir(pretrained_checkpoint):
-        if file_pattern in filename and 'checkpoint' in filename:
+        if file_pattern in filename and 'checkpoint' in filename and '.back.' not in filename:
             full_path = os.path.join(pretrained_checkpoint, filename)
-            checkpoint_files.append(full_path)
-    assert len(checkpoint_files) == 1, f'Expected exactly 1 {file_pattern} checkpoint but found {len(checkpoint_files)} in directory: {pretrained_checkpoint}'
+            if os.path.isfile(full_path):
+                checkpoint_files.append(full_path)
+    available = ', '.join(sorted(os.listdir(pretrained_checkpoint)))
+    assert len(checkpoint_files) == 1, f'Expected exactly 1 {file_pattern} checkpoint but found {len(checkpoint_files)} in directory: {pretrained_checkpoint}. Available files: {available}'
     return checkpoint_files[0]
 
 def load_component_state_dict(checkpoint_path: str) -> Dict[str, torch.Tensor]:
@@ -218,7 +224,6 @@ def get_action_head(cfg: Any, llm_dim: int) -> Union[L1RegressionActionHead]:
         checkpoint_path = find_checkpoint_file(cfg.pretrained_checkpoint, 'action_head')
         state_dict = load_component_state_dict(checkpoint_path)
     action_head.load_state_dict(state_dict)
-    print(f'加载后的 Memory Bank Size: {action_head.memory_bank.size.item()}')
     return action_head
 
 def resize_image_for_policy(img: np.ndarray, resize_size: Union[int, Tuple[int, int]]) -> np.ndarray:

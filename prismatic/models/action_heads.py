@@ -1,85 +1,13 @@
-import os
-import sys
-from typing import List, Optional, Sequence, Tuple
 import math
 import random
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from prismatic.vla.constants import ACTION_DIM, NUM_ACTIONS_CHUNK
-DEFAULT_DINO_CKPT_PATH = os.environ.get('DEPTH_ANYTHING_V2_CKPT', os.path.join('CKPT', 'depth_anything_v2_vits.pth'))
 
 def learnable_random_perturbations(seq_len, dim, device, dtype):
     random_perturbations = nn.Parameter(torch.zeros(seq_len, dim, device=device, dtype=dtype))
     nn.init.normal_(random_perturbations, mean=0.0, std=0.02)
     return random_perturbations
-
-def _extract_main_camera_rgb(pixel_values: torch.Tensor) -> torch.Tensor:
-    if pixel_values is None:
-        raise ValueError('pixel_values must not be None')
-    if pixel_values.dim() == 4:
-        if pixel_values.size(1) < 3:
-            raise ValueError(f'pixel_values has C={pixel_values.size(1)} < 3, cannot extract RGB')
-        return pixel_values[:, :3, :, :]
-    if pixel_values.dim() == 5:
-        if pixel_values.size(2) < 3:
-            raise ValueError(f'pixel_values has C={pixel_values.size(2)} < 3, cannot extract RGB')
-        return pixel_values[:, 0, :3, :, :]
-    raise ValueError(f'Unsupported pixel_values shape={tuple(pixel_values.shape)}; expected 4D or 5D tensor.')
-
-def _try_import_depth_anything_dinov2():
-    depth_anything_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'Depth-Anything-V2'))
-    if os.path.isdir(depth_anything_root) and depth_anything_root not in sys.path:
-        sys.path.append(depth_anything_root)
-    try:
-        from depth_anything_v2.dinov2 import DINOv2 as _DINOv2
-        return _DINOv2
-    except Exception:
-        return None
-
-class DinoV2LayerExtractor:
-
-    def __init__(self, encoder: str='vits', ckpt_path: Optional[str]=None, num_layers: int=12) -> None:
-        self.encoder = encoder
-        self.ckpt_path = ckpt_path or DEFAULT_DINO_CKPT_PATH
-        self.num_layers = num_layers
-        self._model = None
-        self._model_device = None
-        self._model_dtype = None
-
-    def _ensure_loaded(self, device: torch.device, dtype: torch.dtype) -> None:
-        if self._model is not None and self._model_device == device and (self._model_dtype == dtype):
-            return
-        DINOv2 = _try_import_depth_anything_dinov2()
-        if DINOv2 is None:
-            raise ImportError('Failed to import Depth-Anything-V2 DINOv2. Ensure `Depth-Anything-V2/` exists in the repo and is importable.')
-        model = DINOv2(self.encoder)
-        model.eval()
-        for p in model.parameters():
-            p.requires_grad = False
-        if not os.path.exists(self.ckpt_path):
-            raise FileNotFoundError(f'Depth-Anything-V2 checkpoint not found at `{self.ckpt_path}`. Set the correct path or place the file there.')
-        state = torch.load(self.ckpt_path, map_location='cpu')
-        if isinstance(state, dict) and 'state_dict' in state and isinstance(state['state_dict'], dict):
-            state = state['state_dict']
-        if isinstance(state, dict):
-            if any((k.startswith('pretrained.') for k in state.keys())):
-                filtered = {k[len('pretrained.'):]: v for (k, v) in state.items() if k.startswith('pretrained.')}
-                model.load_state_dict(filtered, strict=False)
-            else:
-                model.load_state_dict(state, strict=False)
-        model = model.to(device=device, dtype=dtype)
-        self._model = model
-        self._model_device = device
-        self._model_dtype = dtype
-
-    @torch.no_grad()
-    def extract_layers(self, x: torch.Tensor) -> Tuple[torch.Tensor, ...]:
-        if x.dim() != 4 or x.size(1) != 3:
-            raise ValueError(f'Expected x as (B,3,H,W), got {tuple(x.shape)}')
-        self._ensure_loaded(device=x.device, dtype=x.dtype)
-        layers = self._model.get_intermediate_layers(x, list(range(self.num_layers)), return_class_token=False)
-        return layers
 
 class MemoryBank(nn.Module):
 
@@ -124,12 +52,8 @@ class MemoryBank(nn.Module):
             self.keys = torch.cat([self.keys[num_to_remove:], keys[remaining:]], dim=0)
             self.values = torch.cat([self.values[num_to_remove:], values[remaining:]], dim=0)
             self.size = torch.tensor(self.max_size, dtype=torch.long, device=self.keys.device)
-        if self.size.item() % 100 == 0:
-            print(f'memory length: {self.size.item()}')
 
     def query(self, query_keys, top_k=4):
-        if 0:
-            print(f'memory length: {self.size.item()}')
         query_keys = query_keys.detach()
         if self.size.item() == 0:
             batch_size = query_keys.shape[0]
@@ -181,13 +105,11 @@ class L1RegressionActionHead(nn.Module):
         self.key_layer_indices = [3, 11, 23]
         self.memory_value_proj = nn.Linear(NUM_ACTIONS_CHUNK * ACTION_DIM, hidden_dim * NUM_ACTIONS_CHUNK)
         self.model = MLPResNet(num_blocks=24, input_dim=input_dim * ACTION_DIM, hidden_dim=hidden_dim, output_dim=action_dim, use_pro_version=use_pro_version)
-        self.dino_num_layers = 12
-        self.dino_encoder = 'vits'
-        self.dino_ckpt_path = DEFAULT_DINO_CKPT_PATH
-        self._dino_extractor = DinoV2LayerExtractor(encoder=self.dino_encoder, ckpt_path=self.dino_ckpt_path, num_layers=self.dino_num_layers)
-        dino_dim_map = {'vits': 384, 'vitb': 768, 'vitl': 1024, 'vitg': 1536}
-        self.dino_embed_dim = dino_dim_map.get(self.dino_encoder, 384)
-        self.dino_token_proj = nn.Linear(self.dino_embed_dim, hidden_dim)
+
+    def load_state_dict(self, state_dict, *args, **kwargs):
+        obsolete_keys = ('dino_token_proj.', '.k_dino.', '.v_dino.')
+        state_dict = {k: v for (k, v) in state_dict.items() if not any(obsolete_key in k for obsolete_key in obsolete_keys)}
+        return super().load_state_dict(state_dict, *args, **kwargs)
 
     def build_key(self, task_hidden_states):
         layer_features = []
@@ -223,13 +145,7 @@ class L1RegressionActionHead(nn.Module):
             (batch_size, seq_len, dim) = rearranged_actions_hidden_states.shape
             random_perturbations = learnable_random_perturbations(seq_len, dim, device=rearranged_actions_hidden_states.device, dtype=rearranged_actions_hidden_states.dtype)
             rearranged_actions_hidden_states = rearranged_actions_hidden_states + random_perturbations
-        h_dino_layers = None
-        if pixel_values is not None:
-            main_rgb = _extract_main_camera_rgb(pixel_values)
-            main_rgb = main_rgb.to(device=device, dtype=rearranged_actions_hidden_states.dtype)
-            dino_layers = self._dino_extractor.extract_layers(main_rgb)
-            h_dino_layers = [self.dino_token_proj(layer) for layer in dino_layers]
-        action = self.model(rearranged_actions_hidden_states, h_a=actions_hidden_states, p=proprio_features, h_t=task_hidden_states, h_memory=h_memory, h_dino_layers=h_dino_layers)
+        action = self.model(rearranged_actions_hidden_states, h_a=actions_hidden_states, p=proprio_features, h_t=task_hidden_states, h_memory=h_memory)
         return action
 
 class MLPResNet(nn.Module):
@@ -248,19 +164,13 @@ class MLPResNet(nn.Module):
         self.layer_norm2 = nn.LayerNorm(hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, output_dim)
 
-    def forward(self, x, h_a=None, h_t=None, p=None, h_memory=None, h_dino_layers=None):
+    def forward(self, x, h_a=None, h_t=None, p=None, h_memory=None):
         x = self.layer_norm1(x)
         x = self.fc1(x)
         x = self.relu(x)
-        num_blocks = len(self.mlp_resnet_blocks)
-        num_dino_layers = len(h_dino_layers) if isinstance(h_dino_layers, (list, tuple)) else 0
         for (i, block) in enumerate(self.mlp_resnet_blocks):
-            h_dino = None
-            if num_dino_layers > 0:
-                dino_layer_idx = min(i * num_dino_layers // num_blocks, num_dino_layers - 1)
-                h_dino = h_dino_layers[dino_layer_idx]
             if isinstance(block, MLPResNetBlock_Pro):
-                x = block(x, h_t=h_t[:, i + 1, :], h_a=h_a[:, i + 1, :], p=p, h_memory=h_memory, h_dino=h_dino)
+                x = block(x, h_t=h_t[:, i + 1, :], h_a=h_a[:, i + 1, :], p=p, h_memory=h_memory)
             else:
                 x = block(x, h_t=h_t[:, i + 1, :], h_a=h_a[:, i + 1, :], p=p, h_memory=h_memory)
         x = self.layer_norm2(x)
@@ -353,7 +263,6 @@ class MLPResNetBlock(nn.Module):
         if h_memory is not None:
             if h_memory.dim() != 3:
                 raise ValueError(f'h_memory must be (B, K_m, T*C), got shape={tuple(h_memory.shape)}')
-            K_m = h_memory.size(1)
             mem_dim = h_memory.size(2)
             expected_mem_dim = T * C
             if mem_dim != expected_mem_dim:
@@ -390,8 +299,6 @@ class MLPResNetBlock_Pro(nn.Module):
         self.v_adapter = nn.Linear(dim, dim)
         self.k_task = nn.Linear(dim, dim)
         self.v_task = nn.Linear(dim, dim)
-        self.k_dino = nn.Linear(dim, dim)
-        self.v_dino = nn.Linear(dim, dim)
         self.k_memory = nn.Linear(dim, dim)
         self.v_memory = nn.Linear(dim, dim)
         self.o_proj = nn.Linear(dim, dim)
@@ -402,9 +309,7 @@ class MLPResNetBlock_Pro(nn.Module):
     def apply_film(self, x, gamma, beta):
         return gamma.unsqueeze(1) * x + beta.unsqueeze(1)
 
-    def forward(self, x, h_a=None, h_t=None, p=None, h_memory=None, h_dino=None):
-        if h_memory is None:
-            print('h_dino is None or h_memory is None')
+    def forward(self, x, h_a=None, h_t=None, p=None, h_memory=None):
         g = self.gating_factor
         ratio_g = torch.tanh(g)
         h_adapter = torch.cat((h_a, p), dim=1) if h_a is not None and p is not None else h_a if h_a is not None else p
@@ -412,8 +317,6 @@ class MLPResNetBlock_Pro(nn.Module):
         (B, T, C) = x.shape
         K_a = h_adapter.size(1) if h_adapter is not None else 0
         K_t = h_task.size(1) if h_task is not None else 0
-        K_m = h_memory.size(1) if h_memory is not None else 0
-        K_dino = h_dino.size(1) if h_dino is not None else 0
         q_1 = self.q_proj(x)
         k_tokens = self.k_self(x)
         v_tokens = self.v_self(x)
@@ -430,10 +333,6 @@ class MLPResNetBlock_Pro(nn.Module):
             gate_score_adapter = None
         k_task = self.k_task(h_task) if h_task is not None else None
         v_task = self.v_task(h_task) if h_task is not None else None
-        k_dino = self.k_dino(h_dino) if h_dino is not None else None
-        v_dino = self.v_dino(h_dino) if h_dino is not None else None
-        k_memory = None
-        v_memory = None
 
         def reshape_heads(t, B, L):
             return t.view(B, L, self.num_heads, self.head_dim).transpose(1, 2)
@@ -447,10 +346,6 @@ class MLPResNetBlock_Pro(nn.Module):
             (k_task, v_task) = (reshape_heads(k_task, B, K_t), reshape_heads(v_task, B, K_t))
             (cos_t, sin_t) = self.rope(seq_len=K_t, device=x.device, dtype=x.dtype)
             (_, k_task) = apply_rope(k_task, k_task, cos_t, sin_t)
-        if k_dino is not None:
-            (k_dino, v_dino) = (reshape_heads(k_dino, B, K_dino), reshape_heads(v_dino, B, K_dino))
-            (cos_dino, sin_dino) = self.rope(seq_len=K_dino, device=x.device, dtype=x.dtype)
-            (_, k_dino) = apply_rope(k_dino, k_dino, cos_dino, sin_dino)
         (cos_main, sin_main) = self.rope(seq_len=T, device=x.device, dtype=x.dtype)
         (q_1, k_tokens) = apply_rope(q_1, k_tokens, cos_main, sin_main)
         attn_scores_v = torch.matmul(q_1, k_tokens.transpose(-2, -1))
@@ -478,19 +373,11 @@ class MLPResNetBlock_Pro(nn.Module):
             attn_scores_t = attn_scores_t / math.sqrt(self.head_dim)
             attn_weights_t = torch.softmax(attn_scores_t, dim=-1)
             context_t = torch.matmul(attn_weights_t, v_task)
-        context_dino = None
-        if k_dino is not None and v_dino is not None:
-            attn_scores_dino = torch.matmul(q_1, k_dino.transpose(-2, -1))
-            attn_scores_dino = attn_scores_dino / math.sqrt(self.head_dim)
-            attn_weights_dino = torch.softmax(attn_scores_dino, dim=-1)
-            context_dino = torch.matmul(attn_weights_dino, v_dino)
         context_list = [context_v]
         if context_a is not None:
             context_list.append(context_a)
         if context_t is not None:
             context_list.append(context_t)
-        if context_dino is not None:
-            context_list.append(context_dino)
         output = torch.stack(context_list, dim=0).mean(dim=0)
         output = output.transpose(1, 2).contiguous().view(B, T, C)
         output = self.o_proj(output)

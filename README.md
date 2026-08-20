@@ -1,7 +1,7 @@
 M2-VLA
 ================
 
-This repository contains the implementation of paper M2-VLA:  Boosting Vision-Language Models for Generalizable Manipulation via Layer Mixture and Meta-Skills([https://arxiv.org/abs/2604.24182](M-VLA))
+This repository contains the implementation of paper [M2-VLA:  Boosting Vision-Language Models for Generalizable Manipulation via Layer Mixture and Meta-Skills](M-VLA)
 
 Python Environment
 ------------------

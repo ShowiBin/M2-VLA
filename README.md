@@ -104,3 +104,10 @@ We thank VLA-Adapter for their open-sourced work!
 
 - VLA-Adapter: [https://github.com/OpenHelix-Team/VLA-Adapter](https://github.com/OpenHelix-Team/VLA-Adapter)
 - openVLA: [https://github.com/OpenHelix-Team/VLA-Adapter](https://github.com/openvla/openvla)
+
+
+
+
+Contact
+--------------------
+- xiaosy25@mails.tsinghua.edu.cn
